@@ -368,7 +368,7 @@ public class Login extends JFrame implements ActionListener {
                         "Welcome",
                         JOptionPane.INFORMATION_MESSAGE
                 );
-                new StudentDashboard();
+                new StudentDashboard(user);
                 dispose();
             } else {
                 JOptionPane.showMessageDialog(
@@ -431,6 +431,12 @@ public class Login extends JFrame implements ActionListener {
     }
 
     private String getIconForEmail(String email) {
+        if (email.equalsIgnoreCase("24052641@kiit.ac.in")) {
+            return "👨‍🎓";
+        }
+        if (email.equalsIgnoreCase("24052604@kiit.ac.in")) {
+            return "👨‍💻";
+        }
         if (email.endsWith("@gmail.com")) {
             return "📧";
         }

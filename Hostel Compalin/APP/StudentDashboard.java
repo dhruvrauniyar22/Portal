@@ -64,6 +64,7 @@ public class StudentDashboard extends JFrame {
     private final CardLayout contentLayout;
     private final JPanel contentCards;
 
+    private String loggedInEmail = "";
     private String studentName = "Aarav Sharma";
     private String rollNumber = "CS26-1042";
     private String roomNumber = "B-214";
@@ -82,6 +83,35 @@ public class StudentDashboard extends JFrame {
     private final Map<String, String[]> weeklyMessMenu = new LinkedHashMap<>();
 
     public StudentDashboard() {
+        this("");
+    }
+
+    public StudentDashboard(String email) {
+        this.loggedInEmail = email;
+        if ("24052641@kiit.ac.in".equalsIgnoreCase(email)) {
+            this.studentName = "Sujal Raj San";
+            this.rollNumber = "24052641";
+            this.roomNumber = "A-16";
+            this.hostel = "KP-26";
+            this.branch = "B-Tech (CSE)";
+            this.email = "24052641@kiit.ac.in";
+            this.phone = "253664636";
+            this.guardianName = "jdjdiddk";
+            this.guardianPhone = "3848847875847";
+        } else if ("24052604@kiit.ac.in".equalsIgnoreCase(email)) {
+            this.studentName = "Dhurv Rouynair";
+            this.rollNumber = "24052604";
+            this.roomNumber = "A-168";
+            this.hostel = "KP-26";
+            this.branch = "B-Tech (CSE)";
+            this.email = "24052604@kiit.ac.in";
+            this.phone = "253664636";
+            this.guardianName = "jdjdiddk";
+            this.guardianPhone = "3848847875847";
+        } else if (!email.isEmpty()) {
+            this.email = email;
+        }
+
         setTitle("Hostel Portal - Student Dashboard");
         setSize(1280, 760);
         setMinimumSize(new Dimension(1100, 680));
@@ -1088,7 +1118,40 @@ public class StudentDashboard extends JFrame {
     }
 
     private JPanel profilePhotoCard() {
-        JPanel c = infoCard("Photo", "👤\nStudent profile picture placeholder");
+        JPanel c = new RoundedPanel(24, Color.WHITE, true);
+        c.setLayout(new BoxLayout(c, BoxLayout.Y_AXIS));
+        c.setBorder(new EmptyBorder(20, 22, 20, 22));
+
+        JLabel t = new JLabel("Photo");
+        t.setFont(FONT_SEMIBOLD);
+        t.setForeground(TEXT_MUTED);
+        t.setAlignmentX(LEFT_ALIGNMENT);
+
+        JLabel avatar = new JLabel(loggedInEmail.equalsIgnoreCase("24052641@kiit.ac.in")
+                ? "🧑‍🎓"
+                : loggedInEmail.equalsIgnoreCase("24052604@kiit.ac.in")
+                ? "👨‍💼"
+                : "👤");
+        avatar.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 72));
+        avatar.setAlignmentX(LEFT_ALIGNMENT);
+
+        JLabel name = new JLabel(studentName);
+        name.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        name.setForeground(TEXT_DARK);
+        name.setAlignmentX(LEFT_ALIGNMENT);
+
+        JLabel detail = new JLabel(email);
+        detail.setFont(FONT_REGULAR);
+        detail.setForeground(TEXT_MUTED);
+        detail.setAlignmentX(LEFT_ALIGNMENT);
+
+        c.add(t);
+        c.add(Box.createVerticalStrut(18));
+        c.add(avatar);
+        c.add(Box.createVerticalStrut(12));
+        c.add(name);
+        c.add(Box.createVerticalStrut(4));
+        c.add(detail);
         return c;
     }
 
@@ -1211,6 +1274,17 @@ public class StudentDashboard extends JFrame {
         }
 
         public abstract void update();
+    }
+
+    private JPanel createPlaceholder(String title) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setOpaque(false);
+        panel.setBorder(new EmptyBorder(34, 34, 34, 34));
+        JLabel label = new JLabel(title + " content will be added here.", SwingConstants.CENTER);
+        label.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        label.setForeground(TEXT_MUTED);
+        panel.add(label, BorderLayout.CENTER);
+        return panel;
     }
 
     private String getGreeting() {
