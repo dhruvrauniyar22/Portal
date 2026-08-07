@@ -1213,17 +1213,6 @@ public class StudentDashboard extends JFrame {
         public abstract void update();
     }
 
-    private JPanel createPlaceholder(String title) {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setOpaque(false);
-        panel.setBorder(new EmptyBorder(34, 34, 34, 34));
-        JLabel label = new JLabel(title + " content will be added here.", SwingConstants.CENTER);
-        label.setFont(new Font("Segoe UI", Font.BOLD, 26));
-        label.setForeground(TEXT_MUTED);
-        panel.add(label, BorderLayout.CENTER);
-        return panel;
-    }
-
     private String getGreeting() {
         int hour = LocalTime.now().getHour();
         if (hour < 12) {
