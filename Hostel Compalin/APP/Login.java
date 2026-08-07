@@ -244,7 +244,7 @@ public class Login extends JFrame implements ActionListener {
         panel.add(staff);
 
         // ================= USERNAME =================
-        JLabel u = new JLabel("Email / Roll Number");
+        JLabel u = new JLabel("Email ID");
         u.setForeground(new Color(225, 230, 240));
         u.setBounds(70, 290, 220, 25);
         u.setFont(new Font("Arial", Font.BOLD, 18));
@@ -270,9 +270,18 @@ public class Login extends JFrame implements ActionListener {
         userField.setCaretColor(Color.WHITE);
         userField.setBorder(null);
         userField.getDocument().addDocumentListener(new DocumentListener() {
-            public void insertUpdate(DocumentEvent e) { updateEmailIcon(); }
-            public void removeUpdate(DocumentEvent e) { updateEmailIcon(); }
-            public void changedUpdate(DocumentEvent e) { updateEmailIcon(); }
+            public void insertUpdate(DocumentEvent e) {
+                updateEmailIcon();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                updateEmailIcon();
+            }
+
+            public void changedUpdate(DocumentEvent e) {
+                updateEmailIcon();
+            }
+
             private void updateEmailIcon() {
                 userIcon.setText(getIconForEmail(userField.getText().trim()));
             }

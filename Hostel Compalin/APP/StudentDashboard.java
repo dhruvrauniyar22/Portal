@@ -99,7 +99,7 @@ public class StudentDashboard extends JFrame {
             this.guardianName = "jdjdiddk";
             this.guardianPhone = "3848847875847";
         } else if ("24052604@kiit.ac.in".equalsIgnoreCase(email)) {
-            this.studentName = "Dhurv Rouynair";
+            this.studentName = "Dhurv Rauniyar";
             this.rollNumber = "24052604";
             this.roomNumber = "A-168";
             this.hostel = "KP-26";
