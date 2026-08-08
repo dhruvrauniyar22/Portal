@@ -44,7 +44,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
@@ -913,38 +912,6 @@ public class WardenDashboard extends JFrame {
     }
 
     private void processAIQuery(String query) {
-        if (GeminiService.isConfigured()) {
-            appendChatMessage("HostelMate AI", "Thinking…", false);
-            new SwingWorker<String, Void>() {
-                @Override
-                protected String doInBackground() {
-                    String context = "You are HostelMate, a helpful assistant for a hostel warden. Give concise, "
-                            + "actionable advice, summaries, staff-allocation suggestions, and notice drafts. Never claim "
-                            + "that you actually assigned staff, changed a complaint, or published a notice. Dashboard "
-                            + "context: " + getPendingCount() + " pending complaints, " + getUrgentCount()
-                            + " urgent complaints, " + getResolvedTodayCount() + " resolved today. Warden request: " + query;
-                    return GeminiService.askGemini(context);
-                }
-
-                @Override
-                protected void done() {
-                    int count = chatMessageList.getComponentCount();
-                    if (count >= 2) {
-                        chatMessageList.remove(count - 1);
-                        chatMessageList.remove(count - 2);
-                    }
-                    try {
-                        appendChatMessage("HostelMate AI", get(), false);
-                    } catch (Exception exception) {
-                        appendChatMessage("HostelMate AI", "Error: " + exception.getMessage(), false);
-                    }
-                    chatMessageList.revalidate();
-                    chatMessageList.repaint();
-                }
-            }.execute();
-            return;
-        }
-
         String cleanQuery = query.replaceAll("^[⚡📋👨‍🔧📢📜📊]\\s*", "").toLowerCase();
         String response;
 

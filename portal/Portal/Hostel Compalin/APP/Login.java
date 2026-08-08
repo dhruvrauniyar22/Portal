@@ -5,6 +5,7 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import java.io.File;
 
 public class Login extends JFrame implements ActionListener {
 
@@ -23,8 +24,7 @@ public class Login extends JFrame implements ActionListener {
         setLayout(null);
 
         // ================= BACKGROUND IMAGE =================
-        ImageIcon i1 = new ImageIcon("Icon\\hostel.jpg");
-
+        ImageIcon i1 = loadBackgroundImage();
         Image img = i1.getImage().getScaledInstance(1299, 770, Image.SCALE_SMOOTH);
 
         JLabel background = new JLabel(new ImageIcon(img));
@@ -34,13 +34,14 @@ public class Login extends JFrame implements ActionListener {
         add(background);
 
         // ================= LEFT SIDE =================
-// Logo
+        // Logo
         JLabel logo = new JLabel("🏨");
         logo.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 50));
         logo.setBounds(40, 30, 60, 60);
         background.add(logo);
 
-        JLabel title = new JLabel("<html><span style='color:#ffffff'>Hostel </span><span style='color:#f59218'>Portal</span></html>");
+        JLabel title = new JLabel(
+                "<html><span style='color:#ffffff'>Hostel </span><span style='color:#f59218'>Portal</span></html>");
         title.setForeground(Color.WHITE);
         title.setFont(new Font("Arial", Font.BOLD, 25));
         title.setBounds(110, 25, 260, 40);
@@ -52,7 +53,7 @@ public class Login extends JFrame implements ActionListener {
         subTitle.setBounds(110, 65, 320, 25);
         background.add(subTitle);
 
-// Heading
+        // Heading
         JLabel head1 = new JLabel("Smarter Hostel.");
         head1.setForeground(Color.WHITE);
         head1.setFont(new Font("Arial", Font.BOLD, 26));
@@ -65,14 +66,14 @@ public class Login extends JFrame implements ActionListener {
         head2.setBounds(40, 105, 500, 60);
         background.add(head2);
 
-// Description
+        // Description
         JLabel des = new JLabel("<html>AI-Powered solutions for modern<br>hostel living and management.</html>");
         des.setForeground(new Color(80, 150, 255));
         des.setFont(new Font("Arial", Font.PLAIN, 22));
         des.setBounds(40, 150, 400, 70);
         background.add(des);
 
-// ---------------- Feature 1 ----------------
+        // ---------------- Feature 1 ----------------
         JPanel f1 = new JPanel(null);
         f1.setOpaque(true);
         f1.setBackground(new Color(12, 20, 40, 220));
@@ -100,7 +101,7 @@ public class Login extends JFrame implements ActionListener {
         addFeatureCardHover(f1, i1L, t1, d1, new Color(245, 146, 24));
         background.add(f1);
 
-// ---------------- Feature 2 ----------------
+        // ---------------- Feature 2 ----------------
         JPanel f2 = new JPanel(null);
         f2.setOpaque(true);
         f2.setBackground(new Color(12, 20, 40, 220));
@@ -128,7 +129,7 @@ public class Login extends JFrame implements ActionListener {
         addFeatureCardHover(f2, i2L, t2, d2, new Color(245, 146, 24));
         background.add(f2);
 
-// ---------------- Feature 3 ----------------
+        // ---------------- Feature 3 ----------------
         JPanel f3 = new JPanel(null);
         f3.setOpaque(true);
         f3.setBackground(new Color(12, 20, 40, 220));
@@ -156,7 +157,7 @@ public class Login extends JFrame implements ActionListener {
         addFeatureCardHover(f3, i3L, t3, d3, new Color(102, 204, 255));
         background.add(f3);
 
-// ---------------- Feature 4 ----------------
+        // ---------------- Feature 4 ----------------
         JPanel f4 = new JPanel(null);
         f4.setOpaque(true);
         f4.setBackground(new Color(12, 20, 40, 220));
@@ -244,7 +245,7 @@ public class Login extends JFrame implements ActionListener {
         panel.add(staff);
 
         // ================= USERNAME =================
-        JLabel u = new JLabel("Email / Roll Number");
+        JLabel u = new JLabel("Email ID");
         u.setForeground(new Color(225, 230, 240));
         u.setBounds(70, 290, 220, 25);
         u.setFont(new Font("Arial", Font.BOLD, 18));
@@ -270,9 +271,18 @@ public class Login extends JFrame implements ActionListener {
         userField.setCaretColor(Color.WHITE);
         userField.setBorder(null);
         userField.getDocument().addDocumentListener(new DocumentListener() {
-            public void insertUpdate(DocumentEvent e) { updateEmailIcon(); }
-            public void removeUpdate(DocumentEvent e) { updateEmailIcon(); }
-            public void changedUpdate(DocumentEvent e) { updateEmailIcon(); }
+            public void insertUpdate(DocumentEvent e) {
+                updateEmailIcon();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                updateEmailIcon();
+            }
+
+            public void changedUpdate(DocumentEvent e) {
+                updateEmailIcon();
+            }
+
             private void updateEmailIcon() {
                 userIcon.setText(getIconForEmail(userField.getText().trim()));
             }
@@ -356,42 +366,112 @@ public class Login extends JFrame implements ActionListener {
                         this,
                         "Please enter both username and password.",
                         "Login Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            if (authenticate(user, pass)) {
+            // If student role selected but the entered email is a staff account, block
+            // early.
+            if (student.isSelected() && isStaffEmail(user)) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "The entered email appears to be a staff/warden account.\nPlease select 'Warden / Staff' to continue.",
+                        "Role Mismatch",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (!authenticate(user, pass)) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Invalid username or password for the selected role.\n"
+                                + "Use:\nStudent => student / student123\n"
+                                + "Staff => staff / staff123\n"
+                                + "Warden => wardan@kiit.ac.in or wardan@kiitac.in with password warden123",
+                        "Login Failed",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Successful auth. Route staff/warden to StaffDashboard and keep login open.
+            if (isStaffEmail(user)) {
+                if (student.isSelected()) {
+                    student.setSelected(false);
+                    staff.setSelected(true);
+                    updateRoleButtonStyles();
+                }
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Staff/Warden login successful. Opening staff dashboard.",
+                        "Staff Login",
+                        JOptionPane.INFORMATION_MESSAGE);
+                new StaffDashboard(user);
+                return;
+            }
+
+            if (student.isSelected()) {
                 JOptionPane.showMessageDialog(
                         this,
                         "Login successful! Redirecting to the dashboard.",
                         "Welcome",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-                if (student.isSelected()) {
-                    new StudentDashboard();
-                } else {
-                    new WardenDashboard().setVisible(true);
-                }
+                        JOptionPane.INFORMATION_MESSAGE);
+                new StudentDashboard(user);
                 dispose();
-            } else {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Invalid credentials for selected role.\n"
-                        + "Use:\nStudent => student / student123\n"
-                        + "Staff => staff / staff123",
-                        "Login Failed",
-                        JOptionPane.ERROR_MESSAGE
-                );
+                return;
             }
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select the correct role for the entered account.\n"
+                            + "Use Student for student accounts and Warden / Staff for staff accounts.",
+                    "Role Selection Required",
+                    JOptionPane.WARNING_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Invalid credentials for selected role.\n"
+                            + "Use:\nStudent => student / student123\n"
+                            + "Staff => staff / staff123\n"
+                            + "Warden => wardan@kiit.ac.in or wardan@kiitac.in with password warden123",
+                    "Login Failed",
+                    JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private boolean isStaffEmail(String user) {
+        if (user == null) {
+            return false;
+        }
+        String u = user.trim().toLowerCase();
+        if (u.isEmpty()) {
+            return false;
+        }
+        // Known staff/warden identifiers
+        if (u.equals("staff")) {
+            return true;
+        }
+        if (u.equals("wardan@kiit.ac.in") || u.equals("wardan@kiitac.in")) {
+            return true;
+        }
+        // Add more staff email checks here if needed
+        return false;
     }
 
     private boolean authenticate(String user, String pass) {
         if (student.isSelected()) {
             return !user.isEmpty() && !pass.isEmpty();
         }
-        return "staff".equalsIgnoreCase(user) && "staff123".equals(pass);
+        // Staff/Warden authentication
+        if ("staff".equalsIgnoreCase(user) && "staff123".equals(pass)) {
+            return true;
+        }
+        if ("wardan@kiit.ac.in".equalsIgnoreCase(user) && "warden123".equals(pass)) {
+            return true;
+        }
+        if ("wardan@kiitac.in".equalsIgnoreCase(user) && "warden123".equals(pass)) {
+            return true;
+        }
+        return false;
     }
 
     private void updateRoleButtonStyles() {
@@ -411,7 +491,8 @@ public class Login extends JFrame implements ActionListener {
         }
     }
 
-    private void addFeatureCardHover(JPanel card, JLabel icon, JLabel title, JLabel description, Color iconNormalColor) {
+    private void addFeatureCardHover(JPanel card, JLabel icon, JLabel title, JLabel description,
+            Color iconNormalColor) {
         card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         card.addMouseListener(new MouseAdapter() {
             @Override
@@ -435,6 +516,15 @@ public class Login extends JFrame implements ActionListener {
     }
 
     private String getIconForEmail(String email) {
+        if (email.equalsIgnoreCase("24052641@kiit.ac.in")) {
+            return "👨‍🎓";
+        }
+        if (email.equalsIgnoreCase("24052604@kiit.ac.in")) {
+            return "👨‍💻";
+        }
+        if (email.equalsIgnoreCase("wardan@kiit.ac.in") || email.equalsIgnoreCase("wardan@kiitac.in")) {
+            return "👮";
+        }
         if (email.endsWith("@gmail.com")) {
             return "📧";
         }
@@ -457,6 +547,30 @@ public class Login extends JFrame implements ActionListener {
             return "✉";
         }
         return "✉";
+    }
+
+    /**
+     * Finds the hostel photograph whether the app is started from the
+     * workspace, project, or APP folder.
+     */
+    private ImageIcon loadBackgroundImage() {
+        String[] locations = {
+                "Icon" + File.separator + "hostel.jpg",
+                ".." + File.separator + "Icon" + File.separator + "hostel.jpg",
+                "Portal" + File.separator + "Hostel Compalin" + File.separator + "Icon" + File.separator + "hostel.jpg"
+        };
+
+        for (String location : locations) {
+            File imageFile = new File(location);
+            if (imageFile.isFile()) {
+                ImageIcon icon = new ImageIcon(imageFile.getAbsolutePath());
+                if (icon.getIconWidth() > 0) {
+                    return icon;
+                }
+            }
+        }
+
+        throw new IllegalStateException("Background image not found: Icon" + File.separator + "hostel.jpg");
     }
 
     public static void main(String[] args) {
