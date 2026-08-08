@@ -3,8 +3,6 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 
 public class Login extends JFrame implements ActionListener {
 
@@ -13,7 +11,6 @@ public class Login extends JFrame implements ActionListener {
     JButton loginButton;
     JCheckBox remember;
     JRadioButton student, staff;
-    JLabel userIcon;
 
     public Login() {
         setTitle("Hostel Portal");
@@ -244,7 +241,7 @@ public class Login extends JFrame implements ActionListener {
         panel.add(staff);
 
         // ================= USERNAME =================
-        JLabel u = new JLabel("Email ID");
+        JLabel u = new JLabel("Email / Roll Number");
         u.setForeground(new Color(225, 230, 240));
         u.setBounds(70, 290, 220, 25);
         u.setFont(new Font("Arial", Font.BOLD, 18));
@@ -256,7 +253,7 @@ public class Login extends JFrame implements ActionListener {
         userPanel.setBorder(new LineBorder(new Color(86, 107, 154), 1, true));
         panel.add(userPanel);
 
-        userIcon = new JLabel("✉");
+        JLabel userIcon = new JLabel("✉");
         userIcon.setForeground(new Color(245, 146, 24));
         userIcon.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 20));
         userIcon.setBounds(18, 15, 24, 24);
@@ -269,23 +266,6 @@ public class Login extends JFrame implements ActionListener {
         userField.setForeground(Color.WHITE);
         userField.setCaretColor(Color.WHITE);
         userField.setBorder(null);
-        userField.getDocument().addDocumentListener(new DocumentListener() {
-            public void insertUpdate(DocumentEvent e) {
-                updateEmailIcon();
-            }
-
-            public void removeUpdate(DocumentEvent e) {
-                updateEmailIcon();
-            }
-
-            public void changedUpdate(DocumentEvent e) {
-                updateEmailIcon();
-            }
-
-            private void updateEmailIcon() {
-                userIcon.setText(getIconForEmail(userField.getText().trim()));
-            }
-        });
         userPanel.add(userField);
 
         // ================= PASSWORD =================
@@ -370,48 +350,7 @@ public class Login extends JFrame implements ActionListener {
                 return;
             }
 
-            // If student role selected but the entered email is a staff account, block early.
-            if (student.isSelected() && isStaffEmail(user)) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "The entered email appears to be a staff/warden account.\nPlease select 'Warden / Staff' to continue.",
-                        "Role Mismatch",
-                        JOptionPane.WARNING_MESSAGE
-                );
-                return;
-            }
-
-            if (!authenticate(user, pass)) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Invalid username or password for the selected role.\n"
-                        + "Use:\nStudent => student / student123\n"
-                        + "Staff => staff / staff123\n"
-                        + "Warden => wardan@kiit.ac.in or wardan@kiitac.in with password warden123",
-                        "Login Failed",
-                        JOptionPane.ERROR_MESSAGE
-                );
-                return;
-            }
-
-            // Successful auth. Route staff/warden to StaffDashboard and keep login open.
-            if (isStaffEmail(user)) {
-                if (student.isSelected()) {
-                    student.setSelected(false);
-                    staff.setSelected(true);
-                    updateRoleButtonStyles();
-                }
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Staff/Warden login successful. Opening staff dashboard.",
-                        "Staff Login",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-                new StaffDashboard(user);
-                return;
-            }
-
-            if (student.isSelected()) {
+            if (authenticate(user, pass)) {
                 JOptionPane.showMessageDialog(
                         this,
                         "Login successful! Redirecting to the dashboard.",
@@ -420,63 +359,24 @@ public class Login extends JFrame implements ActionListener {
                 );
                 new StudentDashboard(user);
                 dispose();
-                return;
+            } else {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Invalid credentials for selected role.\n"
+                        + "Use:\nStudent => student / student123\n"
+                        + "Staff => staff / staff123",
+                        "Login Failed",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Please select the correct role for the entered account.\n"
-                    + "Use Student for student accounts and Warden / Staff for staff accounts.",
-                    "Role Selection Required",
-                    JOptionPane.WARNING_MESSAGE
-            );
-        } else {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Invalid credentials for selected role.\n"
-                    + "Use:\nStudent => student / student123\n"
-                    + "Staff => staff / staff123\n"
-                    + "Warden => wardan@kiit.ac.in or wardan@kiitac.in with password warden123",
-                    "Login Failed",
-                    JOptionPane.ERROR_MESSAGE
-            );
         }
-    }
-
-    private boolean isStaffEmail(String user) {
-        if (user == null) {
-            return false;
-        }
-        String u = user.trim().toLowerCase();
-        if (u.isEmpty()) {
-            return false;
-        }
-        // Known staff/warden identifiers
-        if (u.equals("staff")) {
-            return true;
-        }
-        if (u.equals("wardan@kiit.ac.in") || u.equals("wardan@kiitac.in")) {
-            return true;
-        }
-        // Add more staff email checks here if needed
-        return false;
     }
 
     private boolean authenticate(String user, String pass) {
         if (student.isSelected()) {
             return !user.isEmpty() && !pass.isEmpty();
         }
-        // Staff/Warden authentication
-        if ("staff".equalsIgnoreCase(user) && "staff123".equals(pass)) {
-            return true;
-        }
-        if ("wardan@kiit.ac.in".equalsIgnoreCase(user) && "warden123".equals(pass)) {
-            return true;
-        }
-        if ("wardan@kiitac.in".equalsIgnoreCase(user) && "warden123".equals(pass)) {
-            return true;
-        }
-        return false;
+        return "staff".equalsIgnoreCase(user) && "staff123".equals(pass);
     }
 
     private void updateRoleButtonStyles() {
@@ -517,40 +417,6 @@ public class Login extends JFrame implements ActionListener {
                 description.setForeground(new Color(205, 210, 225));
             }
         });
-    }
-
-    private String getIconForEmail(String email) {
-        if (email.equalsIgnoreCase("24052641@kiit.ac.in")) {
-            return "👨‍🎓";
-        }
-        if (email.equalsIgnoreCase("24052604@kiit.ac.in")) {
-            return "👨‍💻";
-        }
-        if (email.equalsIgnoreCase("wardan@kiit.ac.in") || email.equalsIgnoreCase("wardan@kiitac.in")) {
-            return "👮";
-        }
-        if (email.endsWith("@gmail.com")) {
-            return "📧";
-        }
-        if (email.endsWith("@yahoo.com")) {
-            return "💌";
-        }
-        if (email.endsWith("@outlook.com") || email.endsWith("@hotmail.com")) {
-            return "📩";
-        }
-        if (email.endsWith("@kiit.ac.in")) {
-            return "🎓";
-        }
-        if (email.endsWith("@edu") || email.matches(".*@.*\\.edu$")) {
-            return "🎓";
-        }
-        if (email.endsWith("@company.com") || email.endsWith("@hostel.com")) {
-            return "🏢";
-        }
-        if (email.contains("@")) {
-            return "✉";
-        }
-        return "✉";
     }
 
     public static void main(String[] args) {

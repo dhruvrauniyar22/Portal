@@ -64,7 +64,6 @@ public class StudentDashboard extends JFrame {
     private final CardLayout contentLayout;
     private final JPanel contentCards;
 
-    private String loggedInEmail = "";
     private String studentName = "Aarav Sharma";
     private String rollNumber = "CS26-1042";
     private String roomNumber = "B-214";
@@ -83,35 +82,6 @@ public class StudentDashboard extends JFrame {
     private final Map<String, String[]> weeklyMessMenu = new LinkedHashMap<>();
 
     public StudentDashboard() {
-        this("");
-    }
-
-    public StudentDashboard(String email) {
-        this.loggedInEmail = email;
-        if ("24052641@kiit.ac.in".equalsIgnoreCase(email)) {
-            this.studentName = "Sujal Raj San";
-            this.rollNumber = "24052641";
-            this.roomNumber = "A-16";
-            this.hostel = "KP-26";
-            this.branch = "B-Tech (CSE)";
-            this.email = "24052641@kiit.ac.in";
-            this.phone = "253664636";
-            this.guardianName = "jdjdiddk";
-            this.guardianPhone = "3848847875847";
-        } else if ("24052604@kiit.ac.in".equalsIgnoreCase(email)) {
-            this.studentName = "Dhurv Rauniyar";
-            this.rollNumber = "24052604";
-            this.roomNumber = "A-168";
-            this.hostel = "KP-26";
-            this.branch = "B-Tech (CSE)";
-            this.email = "24052604@kiit.ac.in";
-            this.phone = "253664636";
-            this.guardianName = "jdjdiddk";
-            this.guardianPhone = "3848847875847";
-        } else if (!email.isEmpty()) {
-            this.email = email;
-        }
-
         setTitle("Hostel Portal - Student Dashboard");
         setSize(1280, 760);
         setMinimumSize(new Dimension(1100, 680));
@@ -139,6 +109,37 @@ public class StudentDashboard extends JFrame {
         add(createSidebar(), BorderLayout.WEST);
         add(layeredMain, BorderLayout.CENTER);
         setVisible(true);
+    }
+
+    public StudentDashboard(String email) {
+        this();
+        if (email != null) {
+            this.email = email;
+            if ("24052641@kiit.ac.in".equalsIgnoreCase(email)) {
+                this.studentName = "Sujal Raj San";
+                this.rollNumber = "24052641";
+                this.roomNumber = "A-16";
+                this.hostel = "KP-26";
+                this.branch = "B-Tech (CSE)";
+                this.email = "24052641@kiit.ac.in";
+                this.phone = "253664636";
+                this.guardianName = "jdjdiddk";
+                this.guardianPhone = "3848847875847";
+            } else if ("24052604@kiit.ac.in".equalsIgnoreCase(email)) {
+                this.studentName = "Dhurv Rauniyar";
+                this.rollNumber = "24052604";
+                this.roomNumber = "A-168";
+                this.hostel = "KP-26";
+                this.branch = "B-Tech (CSE)";
+                this.email = "24052604@kiit.ac.in";
+                this.phone = "253664636";
+                this.guardianName = "jdjdiddk";
+                this.guardianPhone = "3848847875847";
+            } else {
+                this.email = email;
+            }
+            refreshDashboard();
+        }
     }
 
     public JPanel createSidebar() {
@@ -354,12 +355,12 @@ public class StudentDashboard extends JFrame {
         grid.setBorder(new EmptyBorder(2, 2, 18, 2));
 
         String[][] complaints = {
-            {"HP-1024", "B-214", "Electrical", "High", "Pending", "07 Aug 2026"},
-            {"HP-1019", "B-214", "Plumbing", "Medium", "In Progress", "05 Aug 2026"},
-            {"HP-1008", "B-214", "Housekeeping", "Low", "Resolved", "30 Jul 2026"},
-            {"HP-0996", "B-214", "Wi-Fi", "High", "Rejected", "26 Jul 2026"},
-            {"HP-0988", "B-214", "Furniture", "Medium", "Resolved", "20 Jul 2026"},
-            {"HP-0977", "B-214", "Mess", "Low", "Pending", "17 Jul 2026"}
+            {"HP-1024", "B-214", "Electrical", "High", "Pending", "07 Aug 2026", "Lights flickering near study desk.", "Unassigned", ""},
+            {"HP-1019", "B-214", "Plumbing", "Medium", "In Progress", "05 Aug 2026", "Leak from bathroom pipe.", "Maintenance A", "leak_photo.jpg"},
+            {"HP-1008", "B-214", "Housekeeping", "Low", "Resolved", "30 Jul 2026", "Spill on corridor cleaned.", "Housekeeping Team", ""},
+            {"HP-0996", "B-214", "Wi-Fi", "High", "Rejected", "26 Jul 2026", "Intermittent connectivity since 24th.", "Network Ops", ""},
+            {"HP-0988", "B-214", "Furniture", "Medium", "Resolved", "20 Jul 2026", "Broken chair replaced.", "Carpentry", "chair.jpg"},
+            {"HP-0977", "B-214", "Mess", "Low", "Pending", "17 Jul 2026", "Food temperature was low.", "Mess Incharge", ""}
         };
 
         for (String[] complaint : complaints) {
@@ -405,6 +406,19 @@ public class StudentDashboard extends JFrame {
         viewDetails.setFocusPainted(false);
         viewDetails.setBorder(BorderFactory.createEmptyBorder(11, 18, 11, 18));
         viewDetails.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        viewDetails.addActionListener(evt -> {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Complaint ID: ").append(complaint[0]).append("\n\n");
+            sb.append("Room Number: ").append(complaint[1]).append("\n");
+            sb.append("Category: ").append(complaint[2]).append("\n");
+            sb.append("Priority: ").append(complaint[3]).append("\n");
+            sb.append("Status: ").append(complaint[4]).append("\n");
+            sb.append("Date: ").append(complaint[5]).append("\n\n");
+            sb.append("Comments:\n").append(complaint.length > 6 && complaint[6] != null && !complaint[6].isEmpty() ? complaint[6] : "(none)").append("\n\n");
+            sb.append("Assigned Staff: ").append(complaint.length > 7 && complaint[7] != null && !complaint[7].isEmpty() ? complaint[7] : "Unassigned").append("\n");
+            sb.append("Attachments: ").append(complaint.length > 8 && complaint[8] != null && !complaint[8].isEmpty() ? complaint[8] : "(none)");
+            JOptionPane.showMessageDialog(this, sb.toString(), "Complaint Details", JOptionPane.INFORMATION_MESSAGE);
+        });
 
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         actions.setOpaque(false);
@@ -1118,40 +1132,7 @@ public class StudentDashboard extends JFrame {
     }
 
     private JPanel profilePhotoCard() {
-        JPanel c = new RoundedPanel(24, Color.WHITE, true);
-        c.setLayout(new BoxLayout(c, BoxLayout.Y_AXIS));
-        c.setBorder(new EmptyBorder(20, 22, 20, 22));
-
-        JLabel t = new JLabel("Photo");
-        t.setFont(FONT_SEMIBOLD);
-        t.setForeground(TEXT_MUTED);
-        t.setAlignmentX(LEFT_ALIGNMENT);
-
-        JLabel avatar = new JLabel(loggedInEmail.equalsIgnoreCase("24052641@kiit.ac.in")
-                ? "🧑‍🎓"
-                : loggedInEmail.equalsIgnoreCase("24052604@kiit.ac.in")
-                ? "👨‍💼"
-                : "👤");
-        avatar.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 72));
-        avatar.setAlignmentX(LEFT_ALIGNMENT);
-
-        JLabel name = new JLabel(studentName);
-        name.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        name.setForeground(TEXT_DARK);
-        name.setAlignmentX(LEFT_ALIGNMENT);
-
-        JLabel detail = new JLabel(email);
-        detail.setFont(FONT_REGULAR);
-        detail.setForeground(TEXT_MUTED);
-        detail.setAlignmentX(LEFT_ALIGNMENT);
-
-        c.add(t);
-        c.add(Box.createVerticalStrut(18));
-        c.add(avatar);
-        c.add(Box.createVerticalStrut(12));
-        c.add(name);
-        c.add(Box.createVerticalStrut(4));
-        c.add(detail);
+        JPanel c = infoCard("Photo", "👤\nStudent profile picture placeholder");
         return c;
     }
 
