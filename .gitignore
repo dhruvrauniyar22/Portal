@@ -1,0 +1,18 @@
+# Java build output
+*.class
+build/
+out/
+target/
+bin/
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
