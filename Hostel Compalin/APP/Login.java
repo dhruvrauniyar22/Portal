@@ -370,7 +370,48 @@ public class Login extends JFrame implements ActionListener {
                 return;
             }
 
-            if (authenticate(user, pass)) {
+            // If student role selected but the entered email is a staff account, block early.
+            if (student.isSelected() && isStaffEmail(user)) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "The entered email appears to be a staff/warden account.\nPlease select 'Warden / Staff' to continue.",
+                        "Role Mismatch",
+                        JOptionPane.WARNING_MESSAGE
+                );
+                return;
+            }
+
+            if (!authenticate(user, pass)) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Invalid username or password for the selected role.\n"
+                        + "Use:\nStudent => student / student123\n"
+                        + "Staff => staff / staff123\n"
+                        + "Warden => wardan@kiit.ac.in or wardan@kiitac.in with password warden123",
+                        "Login Failed",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+
+            // Successful auth. Route staff/warden to StaffDashboard and keep login open.
+            if (isStaffEmail(user)) {
+                if (student.isSelected()) {
+                    student.setSelected(false);
+                    staff.setSelected(true);
+                    updateRoleButtonStyles();
+                }
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Staff/Warden login successful. Opening staff dashboard.",
+                        "Staff Login",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+                new StaffDashboard(user);
+                return;
+            }
+
+            if (student.isSelected()) {
                 JOptionPane.showMessageDialog(
                         this,
                         "Login successful! Redirecting to the dashboard.",
@@ -379,24 +420,63 @@ public class Login extends JFrame implements ActionListener {
                 );
                 new StudentDashboard(user);
                 dispose();
-            } else {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Invalid credentials for selected role.\n"
-                        + "Use:\nStudent => student / student123\n"
-                        + "Staff => staff / staff123",
-                        "Login Failed",
-                        JOptionPane.ERROR_MESSAGE
-                );
+                return;
             }
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select the correct role for the entered account.\n"
+                    + "Use Student for student accounts and Warden / Staff for staff accounts.",
+                    "Role Selection Required",
+                    JOptionPane.WARNING_MESSAGE
+            );
+        } else {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Invalid credentials for selected role.\n"
+                    + "Use:\nStudent => student / student123\n"
+                    + "Staff => staff / staff123\n"
+                    + "Warden => wardan@kiit.ac.in or wardan@kiitac.in with password warden123",
+                    "Login Failed",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
+    }
+
+    private boolean isStaffEmail(String user) {
+        if (user == null) {
+            return false;
+        }
+        String u = user.trim().toLowerCase();
+        if (u.isEmpty()) {
+            return false;
+        }
+        // Known staff/warden identifiers
+        if (u.equals("staff")) {
+            return true;
+        }
+        if (u.equals("wardan@kiit.ac.in") || u.equals("wardan@kiitac.in")) {
+            return true;
+        }
+        // Add more staff email checks here if needed
+        return false;
     }
 
     private boolean authenticate(String user, String pass) {
         if (student.isSelected()) {
             return !user.isEmpty() && !pass.isEmpty();
         }
-        return "staff".equalsIgnoreCase(user) && "staff123".equals(pass);
+        // Staff/Warden authentication
+        if ("staff".equalsIgnoreCase(user) && "staff123".equals(pass)) {
+            return true;
+        }
+        if ("wardan@kiit.ac.in".equalsIgnoreCase(user) && "warden123".equals(pass)) {
+            return true;
+        }
+        if ("wardan@kiitac.in".equalsIgnoreCase(user) && "warden123".equals(pass)) {
+            return true;
+        }
+        return false;
     }
 
     private void updateRoleButtonStyles() {
@@ -445,6 +525,9 @@ public class Login extends JFrame implements ActionListener {
         }
         if (email.equalsIgnoreCase("24052604@kiit.ac.in")) {
             return "👨‍💻";
+        }
+        if (email.equalsIgnoreCase("wardan@kiit.ac.in") || email.equalsIgnoreCase("wardan@kiitac.in")) {
+            return "👮";
         }
         if (email.endsWith("@gmail.com")) {
             return "📧";
